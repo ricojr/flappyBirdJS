@@ -9,6 +9,29 @@ let frames = 0;
 const sprite = new Image();
 sprite.src = "img/sprite.png";
 
+// game state
+const state = {
+    current : 0,
+    getReady : 0,
+    game : 1,
+    over : 2
+}
+
+// control the game
+document.addEventListener("click", function(event){
+    switch(state.current){
+        case state.getReady:
+            state.current = state.game;
+            break;
+        case state.game:
+            bird.flap();
+            break;
+        case state.over:
+            state.current = state.getReady;
+            break;
+    }
+})
+
 // background
 // this will draw the background image
 const background = {
@@ -27,7 +50,7 @@ const background = {
     }
 }
 
-// foreground jdfnjf
+// foreground
 // this will draw the foreground
 const foreground = {
     sX : 276,
@@ -62,12 +85,72 @@ const bird = {
 
     frame : 0,
 
+    gravity : 0.25,
+    jump : 4.6,
+    speed : 0,
+
     draw : function(){
         let bird = this.animation[this.frame];
-        context.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+        context.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
 
+    },
+
+    flap : function(){
+        this.speed = - this.jump;
+    },
+
+    update : function(){
+        // if the game state is in get ready state, the bird must flap slowly
+        this.period = state.current == state.getReady ? 10 : 5;
+        // we increment the frame by 1, each period
+        this.frame += frames%this.period == 0 ? 1 : 0;
+        // frame goes from 0 to 4, then again to 0
+        this.frame = this.frame%this.animation.length; 
+
+        if(state.current == state.getReady){
+
+        }else{
+            this.speed += this.gravity;
+            this.y += this.speed;
+        }
     }
     
+}
+
+// get ready message
+const getReady = {
+    sX : 0,
+    sY : 228,
+    w : 173,
+    h : 152,
+    x : canvas.width/2 - 173/2,
+    y : 80,
+
+    draw : function(){
+        if(state.current == state.getReady){
+            context.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+
+        }
+
+    }
+}
+
+// game over message
+const gameOver = {
+    sX : 175,
+    sY : 228,
+    w : 225,
+    h : 202,
+    x : canvas.width/2 - 225/2,
+    y : 90,
+
+    draw : function(){
+        if(state.current == state.over){
+            context.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
+
+        }
+
+    }
 }
 // draw 
 function draw(){
@@ -77,10 +160,12 @@ function draw(){
     background.draw();
     foreground.draw();
     bird.draw();
+    getReady.draw();
+    gameOver.draw();
 }
 // update
 function update(){
-
+    bird.update();
 }
 
 // loop
