@@ -27,7 +27,7 @@ const background = {
     }
 }
 
-// foreground
+// foreground jdfnjf
 // this will draw the foreground
 const foreground = {
     sX : 276,
