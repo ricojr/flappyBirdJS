@@ -4,7 +4,7 @@ const context = canvas.getContext("2d");
 
 // game vars and const
 let frames = 0;
-
+const DEGREE = Math.PI/180;
 // load sprite image
 const sprite = new Image();
 sprite.src = "img/sprite.png";
@@ -59,6 +59,8 @@ const foreground = {
     h : 112,
     x : 0,
     y : canvas.height - 112,
+    
+    dx : 2,
 
     draw : function(){
         context.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x, this.y, this.w, this.h);
@@ -66,6 +68,12 @@ const foreground = {
         context.drawImage(sprite, this.sX, this.sY, this.w, this.h, this.x + this.w, this.y, this.w, this.h);
 
 
+    },
+
+    update : function(){
+        if(state.current == state.game){
+            this.x = (this.x - this.dx)%(this.w/2);
+        }
     }
 }
 
@@ -88,11 +96,17 @@ const bird = {
     gravity : 0.25,
     jump : 4.6,
     speed : 0,
+    rotation : 0,
 
     draw : function(){
         let bird = this.animation[this.frame];
-        context.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, this.x - this.w/2, this.y - this.h/2, this.w, this.h);
 
+        context.save();
+        context.translate(this.x, this.y);
+        context.rotate(this.rotation);
+        context.drawImage(sprite, bird.sX, bird.sY, this.w, this.h, - this.w/2, - this.h/2, this.w, this.h);
+
+        context.restore();
     },
 
     flap : function(){
@@ -108,10 +122,27 @@ const bird = {
         this.frame = this.frame%this.animation.length; 
 
         if(state.current == state.getReady){
-
+            this.y = 150;// reset the bird position if game over
+            this.rotation = 0 * DEGREE;
         }else{
             this.speed += this.gravity;
             this.y += this.speed;
+
+            if(this.y + this.h/2 >= canvas.height - foreground.h){
+                this.y = canvas.height - foreground.h -this.h/2;
+                if(state.current == state.game){
+                    state.current = state.over;
+                }
+            }
+            
+            // if the speed is greater then the jump means the bird will fall down
+            if(this.speed >= this.jump){
+                this.rotation = 90 * DEGREE;
+                this.frame = 1;
+            }else{
+                this.rotation = -25 * DEGREE;
+            }
+
         }
     }
     
@@ -166,6 +197,7 @@ function draw(){
 // update
 function update(){
     bird.update();
+    foreground.update();
 }
 
 // loop
