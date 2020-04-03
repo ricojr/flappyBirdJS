@@ -35,7 +35,18 @@ canvas.addEventListener("click", function(event){
             bird.flap();
             break;
         case state.over:
-            state.current = state.getReady;
+            let rect = canvas.getBoundingClientRect();
+            let clickX = event.clientX - rect.left;
+            let clickY = event.clientY - rect.top;
+
+            // check if we click on the start button 
+            if(clickX >= startBtn.x && clickX <= startBtn.x + startBtn.w && clickY >= startBtn.y && clickY <= startBtn.y + startBtn.h){
+                pipes.reset();
+                bird.speedReset();
+                score.reset();
+                state.current = state.getReady;
+            }
+            
             break;
     }
 })
@@ -155,6 +166,9 @@ const bird = {
             }
 
         }
+    },
+    speedReset : function(){
+        this.speed = 0;
     }
     
 }
@@ -269,7 +283,11 @@ const pipes = {
             // move pipes to the left
             p.x -= this.dx;
         }
+    },
+    reset : function(){
+        this.position = [];
     }
+
 }
 
 // score
@@ -296,6 +314,9 @@ const score = {
             context.strokeText(this.best, 225,228);
         }
 
+    },
+    reset : function(){
+        this.value = 0;
     }
 }
 
