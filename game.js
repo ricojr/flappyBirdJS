@@ -17,8 +17,16 @@ const state = {
     over : 2
 }
 
+// start button coord
+const startBtn = {
+    x : 120,
+    y : 263,
+    w : 83,
+    h : 29,
+}
+
 // control the game
-document.addEventListener("click", function(event){
+canvas.addEventListener("click", function(event){
     switch(state.current){
         case state.getReady:
             state.current = state.game;
@@ -236,7 +244,7 @@ const pipes = {
         for(let i = 0; i < this.position.length; i++){
             let p = this.position[i];
 
-            p.x -= this.dx;
+            
             let bottomPipeYPos = p.y + this.h + this.gap;
 
             // collision detection
@@ -253,10 +261,44 @@ const pipes = {
             // if pipes go beyond canvas, we delete them from the array
             if(p.x + this.w <= 0){
                 this.position.shift();
+                score.value += 1;
+
+                score.best = Math.max(score.value, score.best);
+                localStorage.setItem("best", score.best);
             }
+            // move pipes to the left
+            p.x -= this.dx;
         }
     }
 }
+
+// score
+const score = {
+    best : parseInt(localStorage.getItem("best")) || 0,
+    value : 0,
+
+    draw : function(){
+        context.fillStyle = "#FFF";
+        context.strokeStyle = "#000";
+
+        if(state.current == state.game){
+            context.lineWidth = 1.5;
+            context.font = "35px Teko";
+            context.fillText(this.value, canvas.width/2, 50);
+            context.strokeText(this.value, canvas.width/2, 50);
+
+        }else if(state.current == state.over){
+            // score value
+            context.fillText(this.value, 225,186);
+            context.strokeText(this.value, 225,186);
+            // best score
+            context.fillText(this.best, 225,228);
+            context.strokeText(this.best, 225,228);
+        }
+
+    }
+}
+
 // draw 
 function draw(){
     context.fillStyle = "#70c5ce";
@@ -268,12 +310,14 @@ function draw(){
     bird.draw();
     getReady.draw();
     gameOver.draw();
+    score.draw();
 }
 // update
 function update(){
     bird.update();
     foreground.update();
     pipes.update();
+    
 }
 
 // loop
